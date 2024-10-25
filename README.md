@@ -6,4 +6,6 @@ How to use it:
 
 Syntax:
 
+<code>
 {{bingogame:Apfel, Banane, Kirsche, Dattel, Holunderbeere, Feige, Weintraube, Honigmelone, Johannisbeere, Kiwi, Zitrone, Mango, Nektarine, Orange, Pfirsich, Quitte}}
+</code>
