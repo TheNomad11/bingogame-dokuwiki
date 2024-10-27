@@ -1,13 +1,18 @@
-#bingo-container {
+.bingo-container {
     font-family: Arial, sans-serif;
     max-width: 600px;
     margin: 0 auto;
     padding: 20px;
 }
 
+.bingo-inner-container {
+    text-align: center;
+}
+
 .bingo-card {
     display: grid;
     grid-template-columns: repeat(4, 1fr);
+    grid-template-rows: repeat(4, 1fr);
     gap: 10px;
     margin-top: 20px;
 }
@@ -34,7 +39,7 @@
     color: white;
 }
 
-.popup {
+.bingo-popup {
     display: none;
     position: fixed;
     top: 0;
@@ -46,14 +51,14 @@
     align-items: center;
 }
 
-.popup-content {
+.bingo-popup-content {
     background-color: white;
     padding: 20px;
     border-radius: 5px;
     text-align: center;
 }
 
-button {
+.bingo-close-popup {
     margin-top: 10px;
     padding: 10px 20px;
     font-size: 16px;
