@@ -20,14 +20,16 @@
 .bingo-cell {
     aspect-ratio: 1;
     background-color: #ffffff;
-    border: 1px solid #333;
+    border: 2px solid #4CAF50; /* Change border color */
+    border-radius: 10px; /* Rounded corners */
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2); /* Subtle shadow */
     display: flex;
     justify-content: center;
     align-items: center;
     font-size: 16px;
     font-weight: bold;
     cursor: pointer;
-    transition: background-color 0.3s;
+    transition: background-color 0.3s, transform 0.2s; /* Transition for hover effect */
     padding: 5px;
     word-wrap: break-word;
     text-align: center;
@@ -70,23 +72,34 @@
 /* Desktop styles */
 @media (min-width: 769px) {
     .bingo-cell {
-        font-size: 18px;
+        font-size: 18px; /* Larger font for desktop */
+        padding: 10px; /* More padding for larger screens */
+        transition-duration: 0.3s; /* Smooth transition */
+        transform-origin: center; /* Set transform origin for scaling */
+        &:hover {
+            transform: scale(1.05); /* Slightly enlarge on hover */
+        }
     }
 }
 
 /* Mobile styles */
 @media (max-width: 768px) {
     .bingo-container {
-        padding: 5px;
+        padding: 5px; /* Less padding on mobile */
     }
 
     .bingo-card {
-        gap: 3px;
+        gap: 3px; /* Smaller gap between cards on mobile */
     }
 
     .bingo-cell {
-        font-size: 14px;
-        padding: 2px;
+        font-size: 14px; /* Font size for mobile */
+        padding: 2px; /* Padding for mobile */
         font-weight: 900; /* Bolder font for mobile */
-    }
+        transition-duration: 0.3s; /* Smooth transition */
+        transform-origin: center; /* Set transform origin for scaling */
+        &:hover {
+            transform: scale(1.05); /* Slightly enlarge on hover */
+        }
+   }
 }
