@@ -1,7 +1,7 @@
 base   bingogame
 author TheNomad11
 email  github@basseba.de
-date   2024-10-25
+date   2024-10-27
 name   Bingo Game Plugin
 desc   A plugin to add a customizable Bingo game to DokuWiki pages
 url    https://github.com/TheNomad11/bingogame-dokuwiki
