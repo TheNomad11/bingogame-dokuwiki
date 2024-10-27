@@ -24,7 +24,7 @@
     display: flex;
     justify-content: center;
     align-items: center;
-    font-size: 14px;
+    font-size: 16px;
     font-weight: bold;
     cursor: pointer;
     transition: background-color 0.3s;
@@ -67,7 +67,15 @@
     cursor: pointer;
 }
 
-@media (max-width: 480px) {
+/* Desktop styles */
+@media (min-width: 769px) {
+    .bingo-cell {
+        font-size: 18px;
+    }
+}
+
+/* Mobile styles */
+@media (max-width: 768px) {
     .bingo-container {
         padding: 5px;
     }
@@ -77,7 +85,8 @@
     }
 
     .bingo-cell {
-        font-size: 12px;
+        font-size: 14px;
         padding: 2px;
+        font-weight: 900; /* Bolder font for mobile */
     }
 }
