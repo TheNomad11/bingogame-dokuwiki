@@ -22,13 +22,20 @@ class syntax_plugin_bingogame extends DokuWiki_Syntax_Plugin {
 
     public function handle($match, $state, $pos, Doku_Handler $handler) {
         $match = substr($match, 12, -2); // Remove {{bingogame: and }}
-        $words = array_filter(array_map(function($word) {
-            return substr(trim($word), 0, 30); // Trim and limit to 30 characters
-        }, explode(',', $match)), function($word) {
-            return preg_match('/^[a-zA-Z0-9\s]+$/', $word); // Only allow alphanumeric and spaces
+        $words = array_map(function($word) {
+            return substr(trim($word), 0, 50); // Increase max length to 50 characters
+        }, explode(',', $match));
+
+        $validWords = array_filter($words, function($word) {
+            return preg_match('/^[\p{L}0-9\s\-_]+$/u', $word); // Allow all Unicode letters, numbers, spaces, hyphens, and underscores
         });
-        $words = array_slice($words, 0, 16); // Limit to 16 words
-        return array('words' => $words);
+
+        // If we don't have enough valid words, fill with placeholder words
+        while (count($validWords) < 16) {
+            $validWords[] = 'Bingo ' . (count($validWords) + 1);
+        }
+
+        return array('words' => array_slice($validWords, 0, 16)); // Ensure we only return 16 words
     }
 
     public function render($mode, Doku_Renderer $renderer, $data) {
