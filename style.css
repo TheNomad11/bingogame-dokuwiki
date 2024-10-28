@@ -70,7 +70,7 @@
 /* Desktop styles */
 @media (min-width: 769px) {
    .bingo-cell {
-       font-size: 20px; /* Größere Schriftgröße für Desktop */
+       font-size: 18px; /* Moderate Schriftgröße für Desktop */
    }
 }
 
@@ -80,7 +80,7 @@
         max-width: 100%;
    }
    .bingo-cell {
-        font-size: 16px; /* Größere Schriftgröße für mobile Geräte */
+        font-size: 14px; /* Moderate Schriftgröße für mobile Geräte */
         padding: 2px; /* Padding für mobile Geräte */
    }
 }
