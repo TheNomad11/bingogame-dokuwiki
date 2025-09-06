@@ -1,46 +1,75 @@
 /* lib/plugins/bingo/css/bingo.css */
-.bingo-container { max-width: 700px; margin: 10px auto; }
-.bingo-score { font-size: 1.1em; margin-bottom: 8px; }
 
-.bingo-board { margin: 8px 0; }
+.bingo-container {
+    max-width: 700px;
+    margin: 10px auto;
+    text-align: center;
+}
 
-.bingo-grid {
-  display: grid;
-  gap: 10px;
+.bingo-score {
+    font-size: 1.1em;
+    margin-bottom: 8px;
+    font-weight: bold;
+}
+
+.bingo-board {
+    margin: 8px 0;
+    display: grid;
+    gap: 10px;
+}
+
+/* Grid sizes: dynamically adjust via JS or use these classes if needed */
+.bingo-board.size-3 {
+    grid-template-columns: repeat(3, 1fr);
+}
+.bingo-board.size-4 {
+    grid-template-columns: repeat(4, 1fr);
 }
 
 .bingo-cell {
-  padding: 14px;
-  border: 2px solid #000;
-  background: #f9f9f9;
-  cursor: pointer;
-  min-height: 64px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  word-wrap: break-word;
-  hyphens: auto;
-  font-size: 1rem;
+    padding: 14px;
+    border: 2px solid #000;
+    background: #f9f9f9;
+    cursor: pointer;
+    min-height: 64px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    word-wrap: break-word;
+    overflow-wrap: break-word;
+    hyphens: auto;
+    font-size: 1rem;
+    transition: all 0.3s ease;
+    text-align: center;
 }
 
 .bingo-cell.clicked {
-  background: #8ccb2f;
-  color: #fff;
-  border-color: #6aa728;
+    background-color: #8ccb2f;
+    color: #fff;
+    border-color: #000;
+    pointer-events: none;
 }
 
 .bingo-error {
-  color: #b00;
-  background: #ffecec;
-  padding: 8px;
-  border-radius: 4px;
+    color: #b00;
+    background: #ffecec;
+    padding: 8px;
+    border-radius: 4px;
 }
 
-/* responsive tweaks */
+/* Responsive tweaks */
 @media (max-width: 600px) {
-  .bingo-cell { padding: 10px; font-size: 0.95rem; min-height: 56px; }
+    .bingo-cell {
+        padding: 10px;
+        font-size: 0.95rem;
+        min-height: 56px;
+    }
 }
 
 @media (max-width: 400px) {
-  .bingo-cell { padding: 8px; font-size: 0.85rem; min-height: 46px; }
+    .bingo-cell {
+        padding: 8px;
+        font-size: 0.85rem;
+        min-height: 46px;
+    }
 }
