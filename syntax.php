@@ -41,44 +41,47 @@ class syntax_plugin_bingo extends DokuWiki_Syntax_Plugin {
     }
 
     public function render($mode, Doku_Renderer $renderer, $data) {
-        if($mode !== 'xhtml') return false;
+    if($mode !== 'xhtml') return false;
 
-        $words = $data['words'];
-        $size  = $data['size'];
-        $expected = $size * $size;
+    $words = $data['words'];
+    $size  = $data['size'];
+    $expected = $size * $size;
 
-        // include assets once
-        if(!self::$assets_included){
-            $pluginBase = DOKU_PLUGIN . 'bingo/';
-            $renderer->doc .= '<link rel="stylesheet" href="' . $pluginBase . 'css/bingo.css" />' . "\n";
-            $renderer->doc .= '<script src="' . $pluginBase . 'js/bingo.js"></script>' . "\n";
-            self::$assets_included = true;
-        }
+    // include assets once
+    if(!self::$assets_included){
+        $base = DOKU_BASE . 'lib/plugins/bingo/';
+        $renderer->doc .= '<link rel="stylesheet" href="' . $base . 'css/bingo.css" />'."\n";
+        $renderer->doc .= '<script src="' . $base . 'js/bingo.js"></script>'."\n";
+        self::$assets_included = true;
+    }
 
-        // unique container id
-        static $id = 0;
-        $id++;
-        $containerId = "bingo_board_{$id}";
-        $scoreId     = "bingo_score_{$id}";
+    // unique container id
+    static $id = 0;
+    $id++;
+    $containerId = "bingo_board_{$id}";
+    $scoreId     = "bingo_score_{$id}";
 
-        if(count($words) !== $expected){
-            $renderer->doc .= '<div class="bingo-error">Bitte genau ' . $expected . ' Wörter angeben (size=' . $size . ').</div>';
-            return true;
-        }
-
-        // sound file relative path
-        $soundUrl = DOKU_PLUGIN . 'bingo/sounds/bingo.mp3';
-
-        // render container with data-* attributes for JS
-        $renderer->doc .= '<div class="bingo-container">' . "\n";
-        $renderer->doc .= '<div id="'.htmlspecialchars($containerId).'" class="bingo-board"';
-        $renderer->doc .= ' data-words="'.htmlspecialchars(json_encode($words)).'"';
-        $renderer->doc .= ' data-size="'.htmlspecialchars($size).'"';
-        $renderer->doc .= ' data-sound="'.htmlspecialchars($soundUrl).'"';
-        $renderer->doc .= '></div>' . "\n";
-        $renderer->doc .= '<div id="'.htmlspecialchars($scoreId).'" class="bingo-score">Punkte: 0</div>' . "\n";
-        $renderer->doc .= '</div>' . "\n";
-
+    if(count($words) !== $expected){
+        $renderer->doc .= '<div class="bingo-error">Bitte genau ' . $expected . ' Wörter angeben (size=' . $size . ').</div>';
         return true;
     }
+
+    // sound file
+    $soundUrl = DOKU_BASE . 'lib/plugins/bingo/sounds/bingo.mp3';
+
+    // render container with data-* attributes
+    $renderer->doc .= '<div class="bingo-container">' . "\n";
+    $renderer->doc .= '<div id="'.htmlspecialchars($containerId).'" class="bingo-board"';
+    $renderer->doc .= ' data-words="'.htmlspecialchars(json_encode($words)).'"';
+    $renderer->doc .= ' data-size="'.htmlspecialchars($size).'"';
+    $renderer->doc .= ' data-sound="'.htmlspecialchars($soundUrl).'"';
+    $renderer->doc .= '></div>' . "\n";
+    $renderer->doc .= '<div id="'.htmlspecialchars($scoreId).'" class="bingo-score">Punkte: 0</div>' . "\n";
+    $renderer->doc .= '</div>' . "\n";
+
+    return true;
+}
+
+
+
 }
