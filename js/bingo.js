@@ -1,15 +1,14 @@
-document.addEventListener("DOMContentLoaded", () => {
-    const boardElement = document.getElementById("bingo-board");
-    if (!boardElement) return;
-
-    const words = JSON.parse(boardElement.dataset.words);
-    const size = parseInt(boardElement.dataset.size) || 4;
-    const bingoSound = new Audio(boardElement.dataset.sound);
+function initBingo(config) {
+    const boardElement = document.getElementById(config.containerId);
+    const scoreElement = document.getElementById(config.scoreId);
+    const words = [...config.words];
+    const size = parseInt(config.size);
+    const bingoSound = new Audio(config.sound);
 
     let board = [];
-    let nextCellIndex = Array(size * 2).fill(0); // track progress for rows + cols
-    let completedLines = new Set();
     let points = 0;
+    let nextCellIndex = Array(size).fill(0); // track next required cell per line
+    let completedLines = new Set();
 
     // shuffle words
     function shuffle(array) {
@@ -20,20 +19,20 @@ document.addEventListener("DOMContentLoaded", () => {
         return array;
     }
 
-    const shuffledWords = shuffle([...words]);
+    const shuffledWords = shuffle(words);
 
-    // generate board
+    // generate cells
     for (let i = 0; i < size * size; i++) {
-        const cell = document.createElement("div");
-        cell.className = "bingo-cell";
+        const cell = document.createElement('div');
+        cell.className = 'bingo-cell';
         cell.textContent = shuffledWords[i];
         cell.dataset.index = i;
-        cell.addEventListener("click", () => handleClick(cell, i));
+        cell.addEventListener('click', () => handleClick(cell, i));
         boardElement.appendChild(cell);
         board.push(cell);
     }
 
-    // define rows + cols
+    // define rows and columns
     const rows = [];
     for (let r = 0; r < size; r++) {
         rows.push([...Array(size).keys()].map(c => r * size + c));
@@ -44,39 +43,39 @@ document.addEventListener("DOMContentLoaded", () => {
     }
     const lines = rows.concat(cols);
 
-    // update points display
-    function updatePoints() {
-        const pointsElement = document.getElementById("bingo-points");
-        if (pointsElement) {
-            pointsElement.textContent = "Punkte: " + points;
-        }
-    }
-
     function handleClick(cell, index) {
-        // already clicked? skip
-        if (cell.classList.contains("clicked")) return;
+        let lineCompletedThisClick = false;
+        let correctClick = false;
 
-        // mark cell clicked
-        cell.classList.add("clicked");
-        points++;
-        updatePoints();
-
-        // check each line (row or column) that contains this cell
+        // check all lines that include this cell
         lines.forEach((line, lineIndex) => {
-            if (completedLines.has(lineIndex)) return;
+            if (line.includes(index) && !completedLines.has(lineIndex)) {
+                const expectedIndex = line[nextCellIndex[lineIndex]];
+                if (index === expectedIndex) {
+                    cell.classList.add('clicked');
+                    nextCellIndex[lineIndex]++;
+                    points++;
+                    correctClick = true;
 
-            if (line.every(i => board[i].classList.contains("clicked"))) {
-                completedLines.add(lineIndex);
-                bingoSound.play();
-                alert("Reihe/Spalte fertig!");
+                    if (nextCellIndex[lineIndex] === size) {
+                        completedLines.add(lineIndex);
+                        lineCompletedThisClick = true;
+                    }
+                }
             }
         });
 
-        // check win condition
+        if (!correctClick) points--;
+
+        scoreElement.textContent = 'Punkte: ' + points;
+
+        if (lineCompletedThisClick) {
+            bingoSound.play();
+            alert('Reihe/Spalte fertig!');
+        }
+
         if (completedLines.size === lines.length) {
-            alert("Alle Reihen/Spalten fertig! Bingo!");
+            alert('Alle Reihen/Spalten sind fertig! Endpunkte: ' + points);
         }
     }
-
-    updatePoints();
-});
+}
