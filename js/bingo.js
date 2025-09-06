@@ -1,117 +1,71 @@
-// lib/plugins/bingo/js/bingo.js
-// Expose initBingo so the PHP renderer can call it for each instance
-(function(window){
-  'use strict';
+document.addEventListener("DOMContentLoaded", function () {
+    const bingoBoards = document.querySelectorAll(".bingo-board");
 
-  // simple shuffle (Fisher-Yates)
-  function shuffleArray(array){
-    for (var i = array.length - 1; i > 0; i--){
-      var j = Math.floor(Math.random() * (i + 1));
-      var tmp = array[i];
-      array[i] = array[j];
-      array[j] = tmp;
-    }
-    return array;
-  }
+    bingoBoards.forEach(board => {
+        const cells = board.querySelectorAll(".bingo-cell");
+        const scoreDisplay = board.querySelector(".bingo-score");
+        let score = 0;
+        let completedRows = new Set();
 
-  // create single instance
-  function createInstance(config){
-    var words = Array.isArray(config.words) ? config.words.slice() : [];
-    var size = parseInt(config.size, 10) || 3;
-    var containerId = config.containerId;
-    var scoreId = config.scoreId;
-    var sound = config.sound || '';
+        // Load sound
+        const winSound = new Audio(DOKU_BASE + "lib/plugins/bingolistening/sounds/win.mp3");
 
-    var container = document.getElementById(containerId);
-    var scoreDiv = document.getElementById(scoreId);
+        cells.forEach(cell => {
+            cell.addEventListener("click", function () {
+                if (cell.classList.contains("clicked")) return;
 
-    if(!container) return;
+                cell.classList.add("clicked");
+                score++;
+                scoreDisplay.textContent = "Punkte: " + score;
 
-    if(words.length !== size * size){
-      container.innerHTML = '<div class="bingo-error">Bitte ' + (size*size) + ' Wörter angeben.</div>';
-      return;
-    }
+                // After each click, check rows
+                checkRows();
+            });
+        });
 
-    // prepare audio
-    var bingoSound = null;
-    if(sound){
-      try {
-        bingoSound = new Audio(sound);
-        bingoSound.preload = 'auto';
-      } catch(e) { bingoSound = null; }
-    }
+        function checkRows() {
+            const size = Math.sqrt(cells.length); // 3 for 3x3, 4 for 4x4
+            let allRowsCompleted = true;
 
-    // create shuffled display array
-    var displayWords = shuffleArray(words.slice());
+            // Horizontal rows
+            for (let r = 0; r < size; r++) {
+                let rowComplete = true;
+                for (let c = 0; c < size; c++) {
+                    const idx = r * size + c;
+                    if (!cells[idx].classList.contains("clicked")) {
+                        rowComplete = false;
+                        allRowsCompleted = false;
+                        break;
+                    }
+                }
+                if (rowComplete && !completedRows.has("row" + r)) {
+                    completedRows.add("row" + r);
+                    winSound.play();
+                }
+            }
 
-    // state
-    var currentIndex = 0;
-    var score = 0;
+            // Vertical rows
+            for (let c = 0; c < size; c++) {
+                let colComplete = true;
+                for (let r = 0; r < size; r++) {
+                    const idx = r * size + c;
+                    if (!cells[idx].classList.contains("clicked")) {
+                        colComplete = false;
+                        allRowsCompleted = false;
+                        break;
+                    }
+                }
+                if (colComplete && !completedRows.has("col" + c)) {
+                    completedRows.add("col" + c);
+                    winSound.play();
+                }
+            }
 
-    function updateScore(delta){
-      score += delta;
-      if(scoreDiv) scoreDiv.textContent = 'Punkte: ' + score;
-    }
-
-    function handleCorrect(cell){
-      cell.classList.add('clicked');
-      cell.setAttribute('aria-pressed','true');
-      cell.style.pointerEvents = 'none';
-      updateScore(1);
-      if(bingoSound && typeof bingoSound.play === 'function') bingoSound.play().catch(function(){});
-      currentIndex++;
-      if(currentIndex === words.length){
-        setTimeout(function(){
-          alert('Super! Alle Wörter korrekt angeklickt!\\nEndstand: ' + score + ' Punkte');
-        }, 120);
-      }
-    }
-
-    function handleWrong(){
-      updateScore(-1);
-      alert('Falsches Wort!');
-    }
-
-    // render grid
-    container.innerHTML = '';
-    container.classList.add('bingo-grid');
-    // set CSS grid template according to size
-    container.style.display = 'grid';
-    container.style.gridTemplateColumns = 'repeat(' + size + ', 1fr)';
-    container.style.gap = '10px';
-
-    // build cells from displayWords
-    displayWords.forEach(function(w){
-      var btn = document.createElement('button');
-      btn.type = 'button';
-      btn.className = 'bingo-cell';
-      btn.textContent = w;
-
-      // correct index in listening order = position in original words array
-      var correctIndex = words.indexOf(w);
-      btn.dataset.correctIndex = correctIndex;
-
-      btn.addEventListener('click', function(){
-        var idx = parseInt(this.dataset.correctIndex, 10);
-        if(idx === currentIndex) handleCorrect(this);
-        else handleWrong();
-      });
-
-      container.appendChild(btn);
+            // If all rows are completed → final sound
+            if (allRowsCompleted && !completedRows.has("all")) {
+                completedRows.add("all");
+                winSound.play();
+            }
+        }
     });
-
-    // init score display
-    updateScore(0);
-  }
-
-  // global init function called from PHP renderer
-  window.initBingo = function(config){
-    // allow passing single config or array of configs
-    if(Array.isArray(config)){
-      config.forEach(createInstance);
-    } else {
-      createInstance(config);
-    }
-  };
-
-})(window);
+});
