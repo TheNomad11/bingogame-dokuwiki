@@ -1,77 +1,80 @@
+// lib/plugins/bingo/js/bingo.js
 function initBingo(config) {
     const boardElement = document.getElementById(config.containerId);
     const scoreElement = document.getElementById(config.scoreId);
-    const words = [...config.words];
-    const size = parseInt(config.size);
     const bingoSound = new Audio(config.sound);
 
-    // set dynamic grid columns
-    boardElement.style.display = "grid";
-    boardElement.style.gridTemplateColumns = `repeat(${size}, 1fr)`;
-    boardElement.style.gap = "10px";
-
-    let board = [];
+    const size = config.size;
+    const words = config.words; // predefined correct order
     let points = 0;
-    let nextCellIndex = Array(size).fill(0);
-    let completedLines = new Set();
+    let nextWordIndex = 0; // track next expected word
+    const board = [];
 
+    // shuffle words for display
     function shuffle(array) {
-        for (let i = array.length - 1; i > 0; i--) {
+        const a = [...array];
+        for (let i = a.length - 1; i > 0; i--) {
             const j = Math.floor(Math.random() * (i + 1));
-            [array[i], array[j]] = [array[j], array[i]];
+            [a[i], a[j]] = [a[j], a[i]];
         }
-        return array;
+        return a;
     }
 
     const shuffledWords = shuffle(words);
 
-    for (let i = 0; i < size * size; i++) {
-        const cell = document.createElement('div');
-        cell.className = 'bingo-cell';
-        cell.textContent = shuffledWords[i];
-        cell.dataset.index = i;
-        cell.addEventListener('click', () => handleClick(cell, i));
+    // render board
+    boardElement.innerHTML = "";
+    boardElement.classList.add(`size-${size}`);
+    shuffledWords.forEach((word, idx) => {
+        const cell = document.createElement("div");
+        cell.className = "bingo-cell";
+        cell.textContent = word;
+        cell.dataset.word = word;
         boardElement.appendChild(cell);
         board.push(cell);
-    }
+        cell.addEventListener("click", () => handleClick(cell));
+    });
 
+    // map rows and columns
     const rows = [];
-    for (let r = 0; r < size; r++) rows.push([...Array(size).keys()].map(c => r * size + c));
+    for (let r = 0; r < size; r++) {
+        rows.push([...Array(size).keys()].map(c => r * size + c));
+    }
     const cols = [];
-    for (let c = 0; c < size; c++) cols.push([...Array(size).keys()].map(r => r * size + c));
+    for (let c = 0; c < size; c++) {
+        cols.push([...Array(size).keys()].map(r => r * size + c));
+    }
     const lines = rows.concat(cols);
+    const completedLines = new Set();
 
-    function handleClick(cell, index) {
-        let lineCompletedThisClick = false;
-        let correctClick = false;
+    function handleClick(cell) {
+        const word = cell.dataset.word;
+        if (word === words[nextWordIndex]) {
+            // correct click
+            cell.classList.add("clicked");
+            points += 1;
+            nextWordIndex++;
+            scoreElement.textContent = "Punkte: " + points;
 
-        lines.forEach((line, lineIndex) => {
-            if (line.includes(index) && !completedLines.has(lineIndex)) {
-                const expectedIndex = line[nextCellIndex[lineIndex]];
-                if (index === expectedIndex) {
-                    cell.classList.add('clicked');
-                    nextCellIndex[lineIndex]++;
-                    points++;
-                    correctClick = true;
-
-                    if (nextCellIndex[lineIndex] === size) {
-                        completedLines.add(lineIndex);
-                        lineCompletedThisClick = true;
-                    }
+            // check all lines
+            lines.forEach((line, idx) => {
+                if (completedLines.has(idx)) return;
+                if (line.every(i => board[i].classList.contains("clicked"))) {
+                    completedLines.add(idx);
+                    bingoSound.play();
+                    alert("Reihe/Spalte fertig!");
                 }
+            });
+
+            // check if game finished
+            if (nextWordIndex === words.length) {
+                alert("Alle Wörter richtig geklickt! Gesamtpunkte: " + points);
             }
-        });
-
-        if (!correctClick) points--;
-        scoreElement.textContent = 'Punkte: ' + points;
-
-        if (lineCompletedThisClick) {
-            bingoSound.play();
-            alert('Reihe/Spalte fertig!');
-        }
-
-        if (completedLines.size === lines.length) {
-            alert('Alle Reihen/Spalten fertig! Endpunkte: ' + points);
+        } else {
+            // wrong click
+            points -= 1;
+            scoreElement.textContent = "Punkte: " + points;
+            alert("Falsches Feld! Folge der Reihenfolge.");
         }
     }
 }
