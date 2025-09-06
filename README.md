@@ -14,8 +14,32 @@ Learners click on words in the correct order as they hear them read aloud. Works
 - When a row is completed, a sound effect is played.
 - Fully responsive: works on desktop and mobile.
 
-Syntax:
+## Usage
 
-<code>
-{{bingogame:Apfel,Banane,Kirsche,Dattel,Holunderbeere,Feige,Weintraube,Honigmelone,Johannisbeere,Kiwi,Zitrone,Mango,Nektarine,Orange,Pfirsich,Quitte}}
-</code>
+Insert the plugin into any DokuWiki page using the syntax:
+
+### 3×3 board
+
+<code>{{bingolistening>words="Müll,ehrenamtlich,Flüchtlinge,Umwelt,vermeiden,Wegwerfgesellschaft,Rohstoffe,Lebensstil,nachhaltig"}}</code>
+
+- Exactly 9 words must be provided.
+- The words will be shuffled and displayed in a 3×3 grid.
+
+### 4×4 board
+
+<code>{{bingolistening>words="Haus,Baum,Auto,Katze,Hund,Stuhl,Tisch,Blume,Schule,Arbeit,Buch,Stadt,Land,Fluss,Meer,Wald"}}</code>
+
+- Exactly 16 words must be provided.
+- The words will be shuffled and displayed in a 4×4 grid.
+
+## Customization
+
+- Replace sounds/win.mp3 with your own audio file if desired.
+- Modify style.css to adjust colors, fonts, or grid size.
+- Default: 3×3 on smartphones, 4×4 on desktops (you can adjust the CSS grid for different layouts).
+
+
+
+
+
+
