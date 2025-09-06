@@ -18,7 +18,7 @@
     gap: 10px;
 }
 
-/* Grid sizes: dynamically adjust via JS or use these classes if needed */
+/* Grid sizes for 3x3 and 4x4 */
 .bingo-board.size-3 {
     grid-template-columns: repeat(3, 1fr);
 }
@@ -43,6 +43,7 @@
     text-align: center;
 }
 
+/* clicked state */
 .bingo-cell.clicked {
     background-color: #8ccb2f;
     color: #fff;
@@ -50,6 +51,7 @@
     pointer-events: none;
 }
 
+/* error messages */
 .bingo-error {
     color: #b00;
     background: #ffecec;
@@ -57,7 +59,7 @@
     border-radius: 4px;
 }
 
-/* Responsive tweaks */
+/* responsive tweaks */
 @media (max-width: 600px) {
     .bingo-cell {
         padding: 10px;
