@@ -5,12 +5,16 @@ function initBingo(config) {
     const size = parseInt(config.size);
     const bingoSound = new Audio(config.sound);
 
+    // set dynamic grid columns
+    boardElement.style.display = "grid";
+    boardElement.style.gridTemplateColumns = `repeat(${size}, 1fr)`;
+    boardElement.style.gap = "10px";
+
     let board = [];
     let points = 0;
-    let nextCellIndex = Array(size).fill(0); // track next required cell per line
+    let nextCellIndex = Array(size).fill(0);
     let completedLines = new Set();
 
-    // shuffle words
     function shuffle(array) {
         for (let i = array.length - 1; i > 0; i--) {
             const j = Math.floor(Math.random() * (i + 1));
@@ -21,7 +25,6 @@ function initBingo(config) {
 
     const shuffledWords = shuffle(words);
 
-    // generate cells
     for (let i = 0; i < size * size; i++) {
         const cell = document.createElement('div');
         cell.className = 'bingo-cell';
@@ -32,22 +35,16 @@ function initBingo(config) {
         board.push(cell);
     }
 
-    // define rows and columns
     const rows = [];
-    for (let r = 0; r < size; r++) {
-        rows.push([...Array(size).keys()].map(c => r * size + c));
-    }
+    for (let r = 0; r < size; r++) rows.push([...Array(size).keys()].map(c => r * size + c));
     const cols = [];
-    for (let c = 0; c < size; c++) {
-        cols.push([...Array(size).keys()].map(r => r * size + c));
-    }
+    for (let c = 0; c < size; c++) cols.push([...Array(size).keys()].map(r => r * size + c));
     const lines = rows.concat(cols);
 
     function handleClick(cell, index) {
         let lineCompletedThisClick = false;
         let correctClick = false;
 
-        // check all lines that include this cell
         lines.forEach((line, lineIndex) => {
             if (line.includes(index) && !completedLines.has(lineIndex)) {
                 const expectedIndex = line[nextCellIndex[lineIndex]];
@@ -66,7 +63,6 @@ function initBingo(config) {
         });
 
         if (!correctClick) points--;
-
         scoreElement.textContent = 'Punkte: ' + points;
 
         if (lineCompletedThisClick) {
@@ -75,7 +71,7 @@ function initBingo(config) {
         }
 
         if (completedLines.size === lines.length) {
-            alert('Alle Reihen/Spalten sind fertig! Endpunkte: ' + points);
+            alert('Alle Reihen/Spalten fertig! Endpunkte: ' + points);
         }
     }
 }
