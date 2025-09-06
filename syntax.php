@@ -22,8 +22,7 @@ class syntax_plugin_bingo extends DokuWiki_Syntax_Plugin {
         }
 
         $words_raw = isset($attr['words']) ? $attr['words'] : '';
-        $words = array_map('trim', explode(',', $words_raw));
-        $words = array_values(array_filter($words, function($w){ return $w !== ''; }));
+        $words = array_values(array_filter(array_map('trim', explode(',', $words_raw))));
 
         $size = isset($attr['size']) ? intval($attr['size']) : 3;
         if($size !== 3 && $size !== 4) $size = 3;
@@ -41,7 +40,6 @@ class syntax_plugin_bingo extends DokuWiki_Syntax_Plugin {
         $size  = $data['size'];
         $expected = $size * $size;
 
-        // include assets once
         if(!self::$assets_included){
             $base = DOKU_BASE . 'lib/plugins/bingo/';
             $renderer->doc .= '<link rel="stylesheet" href="' . $base . 'css/bingo.css" />'."\n";
@@ -49,7 +47,6 @@ class syntax_plugin_bingo extends DokuWiki_Syntax_Plugin {
             self::$assets_included = true;
         }
 
-        // unique container ids
         static $id = 0;
         $id++;
         $containerId = "bingo_board_{$id}";
@@ -60,15 +57,14 @@ class syntax_plugin_bingo extends DokuWiki_Syntax_Plugin {
             return true;
         }
 
-        $soundUrl = $base . 'sounds/bingo.mp3';
-
-        // render container
         $renderer->doc .= '<div class="bingo-container">' . "\n";
         $renderer->doc .= '<div id="'.htmlspecialchars($scoreId).'" class="bingo-score">Punkte: 0</div>' . "\n";
-        $renderer->doc .= '<div id="'.htmlspecialchars($containerId).'" class="bingo-board"></div>' . "\n";
+        $renderer->doc .= '<div id="'.htmlspecialchars($containerId).'" class="bingo-board size-'.$size.'"></div>' . "\n";
         $renderer->doc .= '</div>' . "\n";
 
-        // pass JSON object to JS
+        $baseUrl = DOKU_BASE . 'lib/plugins/bingo/';
+        $soundUrl = $baseUrl . 'sounds/bingo.mp3';
+
         $json = json_encode(array(
             'words' => $words,
             'size'  => $size,
@@ -77,7 +73,10 @@ class syntax_plugin_bingo extends DokuWiki_Syntax_Plugin {
             'scoreId' => $scoreId
         ));
 
-        $renderer->doc .= "<script>if(window.initBingo){initBingo($json);}else{document.addEventListener('DOMContentLoaded',function(){if(window.initBingo)initBingo($json);});}</script>\n";
+        $renderer->doc .= "<script>
+            if(window.initBingo){ initBingo($json); }
+            else { document.addEventListener('DOMContentLoaded', function(){ if(window.initBingo) initBingo($json); }); }
+        </script>\n";
 
         return true;
     }
