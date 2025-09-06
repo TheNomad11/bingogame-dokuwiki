@@ -1,5 +1,5 @@
 <?php
-// must be run within Dokuwiki
+// must be run within DokuWiki
 if(!defined('DOKU_INC')) die();
 
 class syntax_plugin_bingo extends DokuWiki_Syntax_Plugin {
@@ -19,16 +19,15 @@ class syntax_plugin_bingo extends DokuWiki_Syntax_Plugin {
     public function handle($match, $state, $pos, Doku_Handler $handler){
         // parse attributes
         $attr = array();
-        // extract attribute pairs key="value"
         if(preg_match_all('/([a-zA-Z_]+)\s*=\s*"([^"]*)"/', $match, $m, PREG_SET_ORDER)){
             foreach($m as $pair){
                 $attr[strtolower($pair[1])] = $pair[2];
             }
         }
+
         // words attribute as comma separated
         $words_raw = isset($attr['words']) ? $attr['words'] : '';
         $words = array_map('trim', explode(',', $words_raw));
-        // filter empty entries
         $words = array_values(array_filter($words, function($w){ return $w !== ''; }));
 
         // size (default 3)
@@ -45,18 +44,18 @@ class syntax_plugin_bingo extends DokuWiki_Syntax_Plugin {
         if($mode !== 'xhtml') return false;
 
         $words = $data['words'];
-        $size = $data['size'];
+        $size  = $data['size'];
         $expected = $size * $size;
 
         // include assets once
         if(!self::$assets_included){
-            $base = DOKU_BASE . 'lib/plugins/bingo/';
-            $renderer->doc .= '<link rel="stylesheet" href="' . $base . 'css/bingo.css" />'."\n";
-            $renderer->doc .= '<script src="' . $base . 'js/bingo.js"></script>'."\n";
+            $pluginBase = DOKU_PLUGIN . 'bingo/';
+            $renderer->doc .= '<link rel="stylesheet" href="' . $pluginBase . 'css/bingo.css" />' . "\n";
+            $renderer->doc .= '<script src="' . $pluginBase . 'js/bingo.js"></script>' . "\n";
             self::$assets_included = true;
         }
 
-        // unique container id so multiple instances can exist
+        // unique container id
         static $id = 0;
         $id++;
         $containerId = "bingo_board_{$id}";
@@ -67,26 +66,18 @@ class syntax_plugin_bingo extends DokuWiki_Syntax_Plugin {
             return true;
         }
 
-        // render container HTML
+        // sound file relative path
+        $soundUrl = DOKU_PLUGIN . 'bingo/sounds/bingo.mp3';
+
+        // render container with data-* attributes for JS
         $renderer->doc .= '<div class="bingo-container">' . "\n";
+        $renderer->doc .= '<div id="'.htmlspecialchars($containerId).'" class="bingo-board"';
+        $renderer->doc .= ' data-words="'.htmlspecialchars(json_encode($words)).'"';
+        $renderer->doc .= ' data-size="'.htmlspecialchars($size).'"';
+        $renderer->doc .= ' data-sound="'.htmlspecialchars($soundUrl).'"';
+        $renderer->doc .= '></div>' . "\n";
         $renderer->doc .= '<div id="'.htmlspecialchars($scoreId).'" class="bingo-score">Punkte: 0</div>' . "\n";
-        $renderer->doc .= '<div id="'.htmlspecialchars($containerId).'" class="bingo-board"></div>' . "\n";
         $renderer->doc .= '</div>' . "\n";
-
-        // Pass config for this instance by inlining a JSON object and calling init
-        $baseUrl = DOKU_BASE . 'lib/plugins/bingo/';
-        $soundUrl = $baseUrl . 'sounds/bingo.mp3'; // ensure file exists
-
-        // prepare JSON-safe words (escape)
-        $json = json_encode(array(
-            'words' => $words,
-            'size'  => $size,
-            'sound' => $soundUrl,
-            'containerId' => $containerId,
-            'scoreId' => $scoreId
-        ));
-
-        $renderer->doc .= "<script>if(window.initBingo) { initBingo($json); } else { document.addEventListener('DOMContentLoaded', function(){ if(window.initBingo) initBingo($json); }); }</script>\n";
 
         return true;
     }
