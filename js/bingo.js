@@ -1,12 +1,15 @@
 document.addEventListener("DOMContentLoaded", () => {
     const boardElement = document.getElementById("bingo-board");
+    if (!boardElement) return;
+
     const words = JSON.parse(boardElement.dataset.words);
     const size = parseInt(boardElement.dataset.size) || 4;
     const bingoSound = new Audio(boardElement.dataset.sound);
 
     let board = [];
-    let nextCellIndex = Array(size).fill(0); // track next required cell per row
-    let completedRows = new Set();
+    let nextCellIndex = Array(size * 2).fill(0); // track progress for rows + cols
+    let completedLines = new Set();
+    let points = 0;
 
     // shuffle words
     function shuffle(array) {
@@ -41,23 +44,39 @@ document.addEventListener("DOMContentLoaded", () => {
     }
     const lines = rows.concat(cols);
 
+    // update points display
+    function updatePoints() {
+        const pointsElement = document.getElementById("bingo-points");
+        if (pointsElement) {
+            pointsElement.textContent = "Punkte: " + points;
+        }
+    }
+
     function handleClick(cell, index) {
-        const lineIndex = lines.findIndex(line => line.includes(index));
-        if (lineIndex === -1 || completedRows.has(lineIndex)) return;
+        // already clicked? skip
+        if (cell.classList.contains("clicked")) return;
 
-        const expectedIndex = lines[lineIndex][nextCellIndex[lineIndex]];
-        if (index === expectedIndex) {
-            // correct next word
-            cell.classList.add("clicked");
-            nextCellIndex[lineIndex]++;
+        // mark cell clicked
+        cell.classList.add("clicked");
+        points++;
+        updatePoints();
 
-            if (nextCellIndex[lineIndex] === size) {
-                // full line completed
-                completedRows.add(lineIndex);
+        // check each line (row or column) that contains this cell
+        lines.forEach((line, lineIndex) => {
+            if (completedLines.has(lineIndex)) return;
+
+            if (line.every(i => board[i].classList.contains("clicked"))) {
+                completedLines.add(lineIndex);
                 bingoSound.play();
                 alert("Reihe/Spalte fertig!");
             }
+        });
+
+        // check win condition
+        if (completedLines.size === lines.length) {
+            alert("Alle Reihen/Spalten fertig! Bingo!");
         }
-        // if wrong: do nothing (skip mode)
     }
+
+    updatePoints();
 });
