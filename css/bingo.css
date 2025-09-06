@@ -1,0 +1,46 @@
+/* lib/plugins/bingo/css/bingo.css */
+.bingo-container { max-width: 700px; margin: 10px auto; }
+.bingo-score { font-size: 1.1em; margin-bottom: 8px; }
+
+.bingo-board { margin: 8px 0; }
+
+.bingo-grid {
+  display: grid;
+  gap: 10px;
+}
+
+.bingo-cell {
+  padding: 14px;
+  border: 2px solid #000;
+  background: #f9f9f9;
+  cursor: pointer;
+  min-height: 64px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  word-wrap: break-word;
+  hyphens: auto;
+  font-size: 1rem;
+}
+
+.bingo-cell.clicked {
+  background: #8ccb2f;
+  color: #fff;
+  border-color: #6aa728;
+}
+
+.bingo-error {
+  color: #b00;
+  background: #ffecec;
+  padding: 8px;
+  border-radius: 4px;
+}
+
+/* responsive tweaks */
+@media (max-width: 600px) {
+  .bingo-cell { padding: 10px; font-size: 0.95rem; min-height: 56px; }
+}
+
+@media (max-width: 400px) {
+  .bingo-cell { padding: 8px; font-size: 0.85rem; min-height: 46px; }
+}
