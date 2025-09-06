@@ -1,71 +1,63 @@
-document.addEventListener("DOMContentLoaded", function () {
-    const bingoBoards = document.querySelectorAll(".bingo-board");
+document.addEventListener("DOMContentLoaded", () => {
+    const boardElement = document.getElementById("bingo-board");
+    const words = JSON.parse(boardElement.dataset.words);
+    const size = parseInt(boardElement.dataset.size) || 4;
+    const bingoSound = new Audio(boardElement.dataset.sound);
 
-    bingoBoards.forEach(board => {
-        const cells = board.querySelectorAll(".bingo-cell");
-        const scoreDisplay = board.querySelector(".bingo-score");
-        let score = 0;
-        let completedRows = new Set();
+    let board = [];
+    let nextCellIndex = Array(size).fill(0); // track next required cell per row
+    let completedRows = new Set();
 
-        // Load sound
-        const winSound = new Audio(DOKU_BASE + "lib/plugins/bingolistening/sounds/win.mp3");
+    // shuffle words
+    function shuffle(array) {
+        for (let i = array.length - 1; i > 0; i--) {
+            const j = Math.floor(Math.random() * (i + 1));
+            [array[i], array[j]] = [array[j], array[i]];
+        }
+        return array;
+    }
 
-        cells.forEach(cell => {
-            cell.addEventListener("click", function () {
-                if (cell.classList.contains("clicked")) return;
+    const shuffledWords = shuffle([...words]);
 
-                cell.classList.add("clicked");
-                score++;
-                scoreDisplay.textContent = "Punkte: " + score;
+    // generate board
+    for (let i = 0; i < size * size; i++) {
+        const cell = document.createElement("div");
+        cell.className = "bingo-cell";
+        cell.textContent = shuffledWords[i];
+        cell.dataset.index = i;
+        cell.addEventListener("click", () => handleClick(cell, i));
+        boardElement.appendChild(cell);
+        board.push(cell);
+    }
 
-                // After each click, check rows
-                checkRows();
-            });
-        });
+    // define rows + cols
+    const rows = [];
+    for (let r = 0; r < size; r++) {
+        rows.push([...Array(size).keys()].map(c => r * size + c));
+    }
+    const cols = [];
+    for (let c = 0; c < size; c++) {
+        cols.push([...Array(size).keys()].map(r => r * size + c));
+    }
+    const lines = rows.concat(cols);
 
-        function checkRows() {
-            const size = Math.sqrt(cells.length); // 3 for 3x3, 4 for 4x4
-            let allRowsCompleted = true;
+    function handleClick(cell, index) {
+        const lineIndex = lines.findIndex(line => line.includes(index));
+        if (lineIndex === -1 || completedRows.has(lineIndex)) return;
 
-            // Horizontal rows
-            for (let r = 0; r < size; r++) {
-                let rowComplete = true;
-                for (let c = 0; c < size; c++) {
-                    const idx = r * size + c;
-                    if (!cells[idx].classList.contains("clicked")) {
-                        rowComplete = false;
-                        allRowsCompleted = false;
-                        break;
-                    }
-                }
-                if (rowComplete && !completedRows.has("row" + r)) {
-                    completedRows.add("row" + r);
-                    winSound.play();
-                }
-            }
+        const expectedIndex = lines[lineIndex][nextCellIndex[lineIndex]];
+        if (index === expectedIndex) {
+            // correct next word
+            cell.classList.add("clicked");
+            nextCellIndex[lineIndex]++;
 
-            // Vertical rows
-            for (let c = 0; c < size; c++) {
-                let colComplete = true;
-                for (let r = 0; r < size; r++) {
-                    const idx = r * size + c;
-                    if (!cells[idx].classList.contains("clicked")) {
-                        colComplete = false;
-                        allRowsCompleted = false;
-                        break;
-                    }
-                }
-                if (colComplete && !completedRows.has("col" + c)) {
-                    completedRows.add("col" + c);
-                    winSound.play();
-                }
-            }
-
-            // If all rows are completed → final sound
-            if (allRowsCompleted && !completedRows.has("all")) {
-                completedRows.add("all");
-                winSound.play();
+            if (nextCellIndex[lineIndex] === size) {
+                // full line completed
+                completedRows.add(lineIndex);
+                bingoSound.play();
+                alert("Reihe/Spalte fertig!");
             }
         }
-    });
+        // if wrong: do nothing (skip mode)
+    }
 });
